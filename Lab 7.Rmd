@@ -1,0 +1,52 @@
+---
+title: "Lab 7"
+author: "Jack Holland"
+date: "2023-10-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(XML)
+library(httr)
+library(stringr)
+library(magrittr)
+library(tidyr)
+```
+
+```{r #1}
+df = read.csv("top100retailers2015.csv")
+```
+
+```{r, #2}
+str(df)
+summary(df)
+```
+
+```{r, #3}
+x <- "[$|,|%]"
+for( i in colnames(df[5:10])){
+  df[[i]] <- gsub(x, "", df[[i]])
+  df[[i]] <- as.numeric(df[[i]])
+}
+```
+
+```{r, #4}
+df <- separate(df, col = Headquarter, into = c("City", "State"), sep = ", ", remove = TRUE, convert = FALSE)
+```
+
+```{r, #5}
+df <- df[2:ncol(df)]
+for(i in 5:ncol(df)){
+  print(summary(df[i]))
+}
+```
+
+```{r, #6}
+df <- df[order(df$RetailSales2014, decreasing = TRUE),]
+head(df)
+```
+
+```{r, #7}
+write.csv(df, "\\\\minerfiles.mst.edu\\dfs\\users\\jrh48k\\Documents\\top100retailers_clean.csv", row.names=FALSE)
+```
