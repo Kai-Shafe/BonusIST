@@ -1,6 +1,6 @@
 ---
 title: "Bonus"
-author: "Jack Holland (jrh48k)"
+author: "Jack Holland (jrh48k), Kai Shafe (kasq5m)"
 date: "2023-11-07"
 output: html_document
 ---
@@ -11,17 +11,20 @@ library(magrittr)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(ggplot2)
+library(maps)
+rm(list = ls())
 ```
 
-## R Markdown
 ```{r Step 1, include=FALSE}
 wd <- getwd()
 nd <- list.dirs(path = wd, full.names = TRUE, recursive = FALSE)
 raw.files <- data.frame(filename = list.files(nd))
-raw.file.paths <- raw.files %>% mutate(filepath = paste(nd, "/", sep = ""))
-dfcn = paste(raw.file.paths[1, "filepath"], raw.file.paths[1, "filename"], sep = "")
+pathToFile <- paste(nd[[2]], "/", sep = "")
+raw.file.paths <- raw.files %>% mutate(filepath = pathToFile)
+dfcn = paste(raw.file.paths[1, "filepath"], raw.file.paths[10, "filename"], sep = "")
 df <- data.frame(read.csv(dfcn))
-for(i in 2:6){
+for(i in 11:15){
   filehead <- raw.file.paths[i, "filepath"]
   filename <- raw.file.paths[i, "filename"]
   filestr <- paste(filehead, filename, sep = "")
@@ -32,10 +35,6 @@ for(i in 2:6){
 ```{r Step 2, echo=FALSE}
 head(df)
 invisible(str(df))
-```
-
-```{r  DBG}
-df <- dfF
 ```
 
 ```{r Step 3}
@@ -51,60 +50,60 @@ df <- separate(df, col = day, into = c("month", "day", "year"), sep = "/", remov
 df <- separate(df, col = time, into = c("hours", "minutes", "seconds"), sep = ":", remove = TRUE, convert = FALSE)
 ```
 
-```{r}
+
+```{r Step 3 part 2}
 df2 <- df
-df$seconds <- sub('.', '', df$seconds)
-dVec <- c(paste(df$year, df$month, df$day, sep = "-0"))
+df$seconds <- sub('.', '', df2$seconds)
+dVec <- c(paste(df2$year, df2$month, df2$day, sep = "-"))
 ddf <- data.frame(dVec)
 tdf <- data.frame(tVec)
 df$time <- tdf$tVec
-df$Date.Time <- paste(ddf$dVec, tdf$tVec, sep = " ")
-mdf <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-df$month <- as.numeric(df$month)
-df$month <- mdf[df$month]
+df$Date.Time <- paste(ddf$dVec, tdf$tVec, sep = "-")
 cOrd <- c("Date.Time", "Lat", "Lon", "Base", "time", "day", "month", "year", "dayofweek", "seconds", "minutes", "hours")
 ddf$dVec <- as.Date(ddf$dVec)
+mdf <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+df$month <- mdf[as.numeric(df2$month)]
 ddf$days <- weekdays(as.POSIXct(ddf$dVec))
 ddf$days <- str_sub(ddf$days, start = 1, end = 3)
 df$dayofweek <- ddf$days
 dfF <- df[, cOrd]
-```
-
-```{r}
-rm(raw.file.paths)
-rm(raw.files)
-rm(tdf)
-
-#ndf <- separate(ndf, col = Date.Time, into = c("date", "time"), sep = " ", remove = TRUE, convert = FALSE)
-# ddf <- dVec
-# ddf$date <- ndf$date
-# ddf$dVec <- as.Date(ddf$dVec)
-# wddf <- ddf
-# wddf$days <- weekdays(as.POSIXct(wddf$dVec))
-# wddf$days <- str_sub(wddf$days, start = 1, end = 3)
-```
-
-```{r}
-df$Date.Time <- gsub("-", "", df$Date.Time)
-df$Date.Time <- gsub(":", "", df$Date.Time)
-df <- separate(df, col = Date.Time, into = c('Date', 'Time'), sep = " ", remove = TRUE, convert = FALSE)
-df$Date <- as.numeric(df$Date)
-dfF <- df
-```
-
-```{r}
-df <- dfF
-```
-
-```{r}
-#df <- subset(df, select = -c(Time))
-#df$Date <- as.character(df$Date)
-#df$Date.Time <- paste(sep = " ", df$Date, df$time)
-df$Date <- as.character(df$Date)
-#df$Date <- as.POSIXct.Date(df$Date, format = "%Y%m%d")
-#df$Date.Time <- as.POSIXlt(df$Date.Time, tz = "", "%Y%m%d %H:%M%S", optional = FALSE)
+# Data cleaning done, do some memory cleaning
+rm(ddf, df, df2, tdf, dVec, tVec)
 ```
 
 
 
+```{r Step 4}
+displayGroup <- table(dfF$hours)
+sortedNames <- order(as.numeric(names(displayGroup)))
+sortedDisplayGroup <- displayGroup[sortedNames]
+barplot(sortedDisplayGroup, main = "Total trips done every hour", xlab = "Hour", ylab = "Trips", col = rainbow(length(sortedNames)))
+```
+
+```{r Step 5}
+displayGroup <- table(dfF$month, dfF$dayofweek)
+weekdaySort <- c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+monthSort <- c("Apr", "May", "Jun", "Jul", "Aug", "Sep")
+sortedDisplayGroup <- displayGroup[monthSort, weekdaySort]
+barplot(sortedDisplayGroup, main = "Total trips done (weekday/month)", xlab = "Weekday", ylab = "Trips", col = heat.colors(length(monthSort)), beside = TRUE ,legend = rownames(sortedDisplayGroup), names.arg = weekdaySort)
+```
+
+```{r Step 6}
+displayGroup <- table(dfF$month)
+sortedDisplayGroup <- displayGroup[monthSort]
+barplot(sortedDisplayGroup, main = "Total trips by month", xlab = "Month", ylab = "Trips", col = terrain.colors(length(monthSort)))
+```
+7: The above bar plot shows a gradual increase in the overall trips taken as time goes on. This represents an increased demand by customers for Uber, and implies that Uber is on an upward trend of demand and the company may want to expand their infrastructure, or launch ad campaigns to encourage new drivers to sign up to meet the demand
+
+```{r Step 8}
+latRange <- c(40, 40.91)
+lonRange <- c(-74.15, -73.7004)
+localMap <- map_data("usa", ylim = latRange, xlim = lonRange)
+ggplot() +
+  geom_polygon(data = localMap, aes(x = long, y = lat, group = group, fill = region), color = "black") + 
+  theme_minimal() +
+  coord_fixed(ratio = 1, xlim = lonRange, ylim = latRange) +
+  ggtitle("Map Data") +
+  geom_point(data = dfF, aes(x = Lon, y = Lat ), color = "black", alpha = 0.2, size = 0.5)
+```
 
