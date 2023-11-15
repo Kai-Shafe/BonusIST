@@ -16,15 +16,17 @@ library(maps)
 rm(list = ls())
 ```
 
+<!-- In order for the program to function appropriately, please ensure that the directory the program is located in also contains the 'Dataset' folder as well, and no other files. We wanted to make sure the program ran on all of our devices with little-to-no modification required, and thus set our csv intake to handle this scenario. If you do have other files in the same directory as the program and dataset subdirectories, the program may not function. Due to this, I will include a copy of the directory as a whole with our other files for submission. Make sure to go to 'Tools' -> 'Global Options' and under 'R General' set the default working directory to this included file, whether it be on desktop or somewhere else in the file system. -->
+
 ```{r Step 1, include=FALSE}
 wd <- getwd()
 nd <- list.dirs(path = wd, full.names = TRUE, recursive = FALSE)
 raw.files <- data.frame(filename = list.files(nd))
-pathToFile <- paste(nd[[2]], "/", sep = "")
+pathToFile <- paste(nd, "/", sep = "")
 raw.file.paths <- raw.files %>% mutate(filepath = pathToFile)
-dfcn = paste(raw.file.paths[1, "filepath"], raw.file.paths[10, "filename"], sep = "")
+dfcn <- paste(raw.file.paths[1, "filepath"], raw.file.paths[1, "filename"], sep = "")
 df <- data.frame(read.csv(dfcn))
-for(i in 11:15){
+for(i in 2:6){
   filehead <- raw.file.paths[i, "filepath"]
   filename <- raw.file.paths[i, "filename"]
   filestr <- paste(filehead, filename, sep = "")
@@ -85,7 +87,7 @@ displayGroup <- table(dfF$month, dfF$dayofweek)
 weekdaySort <- c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 monthSort <- c("Apr", "May", "Jun", "Jul", "Aug", "Sep")
 sortedDisplayGroup <- displayGroup[monthSort, weekdaySort]
-barplot(sortedDisplayGroup, main = "Total trips done (weekday/month)", xlab = "Weekday", ylab = "Trips", col = heat.colors(length(monthSort)), beside = TRUE ,legend = rownames(sortedDisplayGroup), names.arg = weekdaySort)
+barplot(sortedDisplayGroup, main = "Total trips done (weekday/month)", xlab = "Weekday", ylab = "Trips", col = heat.colors(length(monthSort)), beside = TRUE , names.arg = weekdaySort)
 ```
 
 ```{r Step 6}
@@ -93,7 +95,7 @@ displayGroup <- table(dfF$month)
 sortedDisplayGroup <- displayGroup[monthSort]
 barplot(sortedDisplayGroup, main = "Total trips by month", xlab = "Month", ylab = "Trips", col = terrain.colors(length(monthSort)))
 ```
-7: The above bar plot shows a gradual increase in the overall trips taken as time goes on. This represents an increased demand by customers for Uber, and implies that Uber is on an upward trend of demand and the company may want to expand their infrastructure, or launch ad campaigns to encourage new drivers to sign up to meet the demand
+<!-- 7: The above bar plot shows a gradual increase in the overall trips taken as time goes on. This represents an increased demand by customers for Uber, and implies that Uber is on an upward trend of demand and the company may want to expand their infrastructure, or launch ad campaigns to encourage new drivers to sign up to meet the demand -->
 
 ```{r Step 8}
 latRange <- c(40, 40.91)
